@@ -20,7 +20,7 @@ public class SwaggerConfig {
                 .contact(new Contact()
                     .name("Lucas Moreno")
                     .email("lucas.moreno.dev@gmail.com")
-                    .url("https://tusitio.com"))
+                    .url("https://www.lucas-moreno-dev.com/"))
                 .license(new License()
                     .name("MIT")
                     .url("https://opensource.org/licenses/MIT")));
