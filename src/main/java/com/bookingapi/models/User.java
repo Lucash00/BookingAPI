@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -38,15 +39,21 @@ public class User {
 
     @LastModifiedBy
     private String updatedBy;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Booking> bookings;
 
     // Constructores
     public User() {}
 
-    public User(String name, String email, String phone) {
+    public User(String name, String email, String phone, List<Booking> bookings) {
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.bookings = bookings;
     }
+
 
     // Getters y setters
     public Long getId() {
@@ -75,6 +82,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+    
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 
     public LocalDateTime getCreatedAt() {

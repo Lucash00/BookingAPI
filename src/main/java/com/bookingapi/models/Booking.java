@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
-@EntityListeners(AuditingEntityListener.class) // << activar auditoría
+@EntityListeners(AuditingEntityListener.class)
 public class Booking {
 
     @Id
@@ -25,6 +25,14 @@ public class Booking {
     private String service;
     private LocalDate bookingDate;
     private boolean confirmed;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -41,70 +49,43 @@ public class Booking {
     @LastModifiedBy
     private String updatedBy;
 
-    // Constructores
+    // Constructor vacío
     public Booking() {}
 
-    public Booking(String customerName, String service, LocalDate bookingDate, boolean confirmed) {
+    // Constructor con todos los datos necesarios
+    public Booking(String customerName, String service, LocalDate bookingDate, boolean confirmed, User user, Room room) {
         this.customerName = customerName;
         this.service = service;
         this.bookingDate = bookingDate;
         this.confirmed = confirmed;
+        this.user = user;
+        this.room = room;
     }
 
     // Getters y setters
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    public String getService() { return service; }
+    public void setService(String service) { this.service = service; }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    public LocalDate getBookingDate() { return bookingDate; }
+    public void setBookingDate(LocalDate bookingDate) { this.bookingDate = bookingDate; }
 
-    public String getService() {
-        return service;
-    }
+    public boolean isConfirmed() { return confirmed; }
+    public void setConfirmed(boolean confirmed) { this.confirmed = confirmed; }
 
-    public void setService(String service) {
-        this.service = service;
-    }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public LocalDate getBookingDate() {
-        return bookingDate;
-    }
+    public Room getRoom() { return room; }
+    public void setRoom(Room room) { this.room = room; }
 
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public boolean isConfirmed() {
-        return confirmed;
-    }
-
-    public void setConfirmed(boolean confirmed) {
-        this.confirmed = confirmed;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getCreatedBy() { return createdBy; }
+    public String getUpdatedBy() { return updatedBy; }
 }
