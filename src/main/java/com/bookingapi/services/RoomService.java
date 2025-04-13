@@ -12,8 +12,7 @@ import java.util.List;
 @Service
 public class RoomService {
 
-    @Autowired
-    private RoomRepository roomRepository;
+    @Autowired RoomRepository roomRepository;
 
     // Obtener todas las habitaciones
     public List<Room> getAllRooms() {
@@ -45,17 +44,12 @@ public class RoomService {
 
     // Actualizar una habitación existente
     public Room updateRoom(Long id, Room room) {
-        // Verificar si la habitación existe
-        if (!roomRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Room not found with id: " + id);
-        }
-
         // Validación básica para actualizar
-        if (room.getName() == null || room.getCapacity() <= 0) {  // Cambiado a `name` y `capacity`
+        if (room.getName() == null || room.getCapacity() <= 0) {
             throw new ValidationException("Room name and valid capacity must be provided");
         }
 
-        // No necesitas actualizar el id
+        // Verificar si la habitación existe
         Room existingRoom = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 

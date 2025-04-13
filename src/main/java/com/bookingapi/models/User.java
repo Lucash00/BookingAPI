@@ -20,11 +20,14 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // El id no tiene setter
+    private Long id;
 
     private String name;
     private String email;
     private String phone;
+
+    // Nueva propiedad para la contraseña
+    private String password;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -41,13 +44,13 @@ public class User {
     @LastModifiedBy
     private String updatedBy;
 
-    @ManyToMany(fetch = FetchType.EAGER)  // EAGER para cargar roles al cargar el usuario
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private List<Role> roles;  // Relación de muchos a muchos con roles
+    private List<Role> roles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -56,10 +59,11 @@ public class User {
     // Constructores
     public User() {}
 
-    public User(String name, String email, String phone, List<Booking> bookings, List<Role> roles) {
+    public User(String name, String email, String phone, String password, List<Booking> bookings, List<Role> roles) {
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.password = password;
         this.bookings = bookings;
         this.roles = roles;
     }
@@ -91,6 +95,14 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public List<Booking> getBookings() {
@@ -132,7 +144,7 @@ public class User {
         if (user.getEmail() == null || !user.getEmail().matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
             throw new ValidationException("Valid email is required.");
         }
-        if (user.getPhone() == null || !user.getPhone().matches("^\\+?[0-9]*$")) {  // Regex para número de teléfono
+        if (user.getPhone() == null || !user.getPhone().matches("^\\+?[0-9]*$")) {
             throw new ValidationException("Valid phone number is required.");
         }
     }

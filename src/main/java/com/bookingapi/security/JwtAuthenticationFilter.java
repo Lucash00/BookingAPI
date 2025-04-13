@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private final JwtTokenUtils jwtTokenUtils;
+
+    public JwtAuthenticationFilter(JwtTokenUtils jwtTokenUtils) {
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -24,10 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            String username = JwtTokenUtils.extractUsername(token);
-            if (username != null && JwtTokenUtils.validateToken(token, username)) {
+            String username = jwtTokenUtils.extractUsername(token); // Usamos la instancia de JwtTokenUtils
+
+            if (username != null && jwtTokenUtils.validateToken(token, username)) {
                 // Extraemos roles
-                List<String> roles = JwtTokenUtils.extractRoles(token);  // Método que debe estar en JwtTokenUtils para extraer roles
+                List<String> roles = jwtTokenUtils.extractRoles(token);  // Método que debe estar en JwtTokenUtils para extraer roles
 
                 // Convertimos roles a SimpleGrantedAuthority
                 List<SimpleGrantedAuthority> authorities = roles.stream()
@@ -38,9 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                // Limpiar el contexto de seguridad si el token es inválido
+                SecurityContextHolder.clearContext();
             }
         }
 
         filterChain.doFilter(request, response);
     }
+
 }

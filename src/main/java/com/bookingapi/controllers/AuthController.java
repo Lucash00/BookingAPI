@@ -10,16 +10,22 @@ import com.bookingapi.security.JwtTokenUtils;
 @RestController
 public class AuthController {
 
-	@PostMapping("/login")
-	public String login(@RequestBody LoginRequest loginRequest) {
-	    if (loginRequest.getUsername() == null || loginRequest.getUsername().isBlank()) {
-	        throw new ValidationException("El nombre de usuario es obligatorio.");
-	    }
-	    if (loginRequest.getPassword() == null || loginRequest.getPassword().isBlank()) {
-	        throw new ValidationException("La contraseña es obligatoria.");
-	    }
-	    return JwtTokenUtils.generateToken(loginRequest.getUsername());
-	}
+    private final JwtTokenUtils jwtTokenUtils;
+
+    public AuthController(JwtTokenUtils jwtTokenUtils) {
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest loginRequest) {
+        if (loginRequest.getUsername() == null || loginRequest.getUsername().isBlank()) {
+            throw new ValidationException("El nombre de usuario es obligatorio.");
+        }
+        if (loginRequest.getPassword() == null || loginRequest.getPassword().isBlank()) {
+            throw new ValidationException("La contraseña es obligatoria.");
+        }
+        return jwtTokenUtils.generateToken(loginRequest.getUsername());
+    }
 
 }
 
@@ -44,4 +50,3 @@ class LoginRequest {
         this.password = password;
     }
 }
-

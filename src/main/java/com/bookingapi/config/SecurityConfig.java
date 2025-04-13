@@ -1,6 +1,7 @@
 package com.bookingapi.config;
 
 import com.bookingapi.security.JwtAuthenticationFilter;
+import com.bookingapi.security.JwtTokenUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -11,8 +12,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
+    private final JwtTokenUtils jwtTokenUtils;
+
+    public SecurityConfig(JwtTokenUtils jwtTokenUtils) {
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
@@ -23,7 +30,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/bookings/**").hasAnyRole("USER", "ADMIN") // Usuarios y ADMIN pueden acceder a las reservas
                 .anyRequest().permitAll() // El resto público
             )
-            .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtils), UsernamePasswordAuthenticationFilter.class) // Ahora inyectamos JwtTokenUtils
             .httpBasic(Customizer.withDefaults());
 
         return http.build();

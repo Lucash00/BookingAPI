@@ -12,8 +12,7 @@ import java.util.List;
 @Service
 public class BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    @Autowired BookingRepository bookingRepository;
 
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();

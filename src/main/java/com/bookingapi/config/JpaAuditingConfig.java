@@ -12,7 +12,7 @@ import java.util.Optional;
 public class JpaAuditingConfig {
 
     @Bean
-    public AuditorAware<String> auditorProvider() {
+    AuditorAware<String> auditorProvider() {
         return () -> Optional.of("system"); // Aquí puedes devolver el usuario autenticado más adelante
     }
 }
