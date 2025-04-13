@@ -108,7 +108,7 @@ BookingAPI es una API RESTful desarrollada con Spring Boot que permite gestionar
 
 ###1. Clona el repositorio:
 
-	git clone https://github.com/tu_usuario/bookingapi.git
+	git clone https://github.com/Lucash00/bookingapi.git
    
 ###2. Navega al directorio del proyecto:
 
@@ -122,7 +122,6 @@ O si usas Gradle:
 
 	gradle bootRun
 
-La API estará disponible en **http://localhost:8080**
 
 ## Swagger
 
