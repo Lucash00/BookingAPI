@@ -3,7 +3,6 @@ package com.bookingapi.services;
 import com.bookingapi.models.Booking;
 import com.bookingapi.repositories.BookingRepository;
 import com.bookingapi.exceptions.ResourceNotFoundException;
-import com.bookingapi.exceptions.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

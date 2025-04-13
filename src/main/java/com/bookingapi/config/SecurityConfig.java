@@ -1,10 +1,12 @@
 package com.bookingapi.config;
 
+import com.bookingapi.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -14,10 +16,12 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // ✅ Swagger público
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger público
+                .requestMatchers("/login").permitAll() // Login público
+                .requestMatchers("/api/**").authenticated() // Protegido con JWT
+                .anyRequest().permitAll() // El resto público
             )
+            .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .httpBasic(Customizer.withDefaults());
 
         return http.build();
