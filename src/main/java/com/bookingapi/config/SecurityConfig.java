@@ -19,6 +19,8 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger público
                 .requestMatchers("/login").permitAll() // Login público
                 .requestMatchers("/api/**").authenticated() // Protegido con JWT
+                .requestMatchers("/api/users/**").hasRole("ADMIN") // Solo ADMIN puede acceder a los usuarios
+                .requestMatchers("/api/bookings/**").hasAnyRole("USER", "ADMIN") // Usuarios y ADMIN pueden acceder a las reservas
                 .anyRequest().permitAll() // El resto público
             )
             .addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)

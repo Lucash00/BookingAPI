@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 public class JwtTokenUtils {
 
@@ -15,7 +16,7 @@ public class JwtTokenUtils {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000))
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // Expira en 1 hora
                 .signWith(KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -36,6 +37,20 @@ public class JwtTokenUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
+    }
+
+    public static List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);  // Ahora llamamos correctamente a extractAllClaims
+        return (List<String>) claims.get("roles");
+    }
+
+    // Método auxiliar para obtener todos los claims
+    private static Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     public static boolean isTokenExpired(String token) {

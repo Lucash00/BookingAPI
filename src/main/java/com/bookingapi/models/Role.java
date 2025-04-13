@@ -10,14 +10,13 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String name;  // Ej: "ADMIN", "USER", etc.
+    
+    private String name;
 
     @ManyToMany(mappedBy = "roles")
     private List<User> users;
 
-    // Constructor, getters, setters
-
+    // Constructores, getters y setters
     public Role() {}
 
     public Role(String name) {
