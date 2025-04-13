@@ -50,24 +50,17 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        // Validaciones
-        if (updatedUser.getName() == null || updatedUser.getName().isBlank()) {  // Cambié username por name
-            throw new ValidationException("El nombre de usuario es obligatorio.");
-        }
-
-        if (updatedUser.getEmail() == null || updatedUser.getEmail().isBlank()) {
-            throw new ValidationException("El correo electrónico es obligatorio.");
-        }
-
+        validateUserInput(updatedUser);
         try {
             User user = userService.updateUser(id, updatedUser);
             return ResponseEntity.ok(user);
         } catch (ResourceNotFoundException ex) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (ValidationException ex) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Puedes enviar ErrorResponse aquí
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -76,6 +69,16 @@ public class UserController {
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundException ex) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    
+    private void validateUserInput(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {  // Cambié username por name
+            throw new ValidationException("El nombre de usuario es obligatorio.");
+        }
+
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new ValidationException("El correo electrónico es obligatorio.");
         }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.bookingapi.exceptions.ValidationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
@@ -39,7 +40,15 @@ public class User {
 
     @LastModifiedBy
     private String updatedBy;
-    
+
+    @ManyToMany(fetch = FetchType.EAGER)  // EAGER para cargar roles al cargar el usuario
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private List<Role> roles;  // Relación de muchos a muchos con roles
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Booking> bookings;
@@ -47,13 +56,13 @@ public class User {
     // Constructores
     public User() {}
 
-    public User(String name, String email, String phone, List<Booking> bookings) {
+    public User(String name, String email, String phone, List<Booking> bookings, List<Role> roles) {
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.bookings = bookings;
+        this.roles = roles;
     }
-
 
     // Getters y setters
     public Long getId() {
@@ -83,13 +92,21 @@ public class User {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-    
+
     public List<Booking> getBookings() {
         return bookings;
     }
 
     public void setBookings(List<Booking> bookings) {
         this.bookings = bookings;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -106,5 +123,17 @@ public class User {
 
     public String getUpdatedBy() {
         return updatedBy;
+    }
+
+    public void validateUserInput(User user) {
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
+            throw new ValidationException("User name is required.");
+        }
+        if (user.getEmail() == null || !user.getEmail().matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
+            throw new ValidationException("Valid email is required.");
+        }
+        if (user.getPhone() == null || !user.getPhone().matches("^\\+?[0-9]*$")) {  // Regex para número de teléfono
+            throw new ValidationException("Valid phone number is required.");
+        }
     }
 }

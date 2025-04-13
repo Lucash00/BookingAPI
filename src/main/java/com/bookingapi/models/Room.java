@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.bookingapi.exceptions.ValidationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
@@ -117,4 +118,17 @@ public class Room {
     public String getUpdatedBy() {
         return updatedBy;
     }
+    
+    public void validateRoomInput(Room room) {
+        if (room.getName() == null || room.getName().trim().isEmpty()) {
+            throw new ValidationException("Room name is required.");
+        }
+        if (room.getLocation() == null || room.getLocation().trim().isEmpty()) {
+            throw new ValidationException("Room location is required.");
+        }
+        if (room.getCapacity() <= 0) {
+            throw new ValidationException("Room capacity must be greater than 0.");
+        }
+    }
+
 }

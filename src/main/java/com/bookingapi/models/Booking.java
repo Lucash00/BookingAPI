@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.bookingapi.exceptions.ValidationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
@@ -88,4 +89,23 @@ public class Booking {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public String getCreatedBy() { return createdBy; }
     public String getUpdatedBy() { return updatedBy; }
+    
+    public void validateBookingInput(Booking booking) {
+        if (booking.getCustomerName() == null || booking.getCustomerName().trim().isEmpty()) {
+            throw new ValidationException("Customer name is required.");
+        }
+        if (booking.getService() == null || booking.getService().trim().isEmpty()) {
+            throw new ValidationException("Service is required.");
+        }
+        if (booking.getBookingDate() == null || booking.getBookingDate().isBefore(LocalDate.now())) {
+            throw new ValidationException("Booking date cannot be in the past.");
+        }
+        if (booking.getUser() == null) {
+            throw new ValidationException("User is required.");
+        }
+        if (booking.getRoom() == null) {
+            throw new ValidationException("Room is required.");
+        }
+    }
+
 }

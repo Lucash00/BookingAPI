@@ -48,11 +48,12 @@ public class BookingController {
             Booking booking = bookingService.updateBooking(id, updatedBooking);
             return ResponseEntity.ok(booking);
         } catch (ResourceNotFoundException ex) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Proporcionar un mensaje específico
         } catch (ValidationException ex) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);  // Validación específica
         }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {

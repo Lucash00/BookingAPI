@@ -4,17 +4,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bookingapi.exceptions.ValidationException;
 import com.bookingapi.security.JwtTokenUtils;
 
 @RestController
 public class AuthController {
 
-    @PostMapping("/login")
-    public String login(@RequestBody LoginRequest loginRequest) {
-        // Aquí validas el usuario y la contraseña (por simplicidad se asume que son correctos)
-        // Normalmente se validaría contra la base de datos
-        return JwtTokenUtils.generateToken(loginRequest.getUsername());
-    }
+	@PostMapping("/login")
+	public String login(@RequestBody LoginRequest loginRequest) {
+	    if (loginRequest.getUsername() == null || loginRequest.getUsername().isBlank()) {
+	        throw new ValidationException("El nombre de usuario es obligatorio.");
+	    }
+	    if (loginRequest.getPassword() == null || loginRequest.getPassword().isBlank()) {
+	        throw new ValidationException("La contraseña es obligatoria.");
+	    }
+	    return JwtTokenUtils.generateToken(loginRequest.getUsername());
+	}
+
 }
 
 // Clase auxiliar para recibir la solicitud de login
