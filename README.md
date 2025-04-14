@@ -48,17 +48,26 @@ BookingAPI es una API RESTful desarrollada con Spring Boot que permite gestionar
 
 ### 1. Autenticación
 
-- **POST** `/api/auth/register`: Registra un nuevo usuario.
+- **POST** `/register`: Registra un nuevo usuario.
   - **Request Body**:
     ```json
     {
-      "username": "john.doe",
-      "password": "password123",
-      "email": "john.doe@example.com"
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "123456789",
+      "password": "password123"
     }
     ```
+   - **Response**:
+    
+Devuelve un JWT (Token de autenticación) que se puede usar para acceder a rutas protegidas.
+```
+    {
+      "token": "your-jwt-token"
+    }
+```
 
-- **POST** `/api/auth/login`: Autentica al usuario y devuelve un JWT.
+- **POST** `/login`: Autentica al usuario y devuelve un JWT.
   - **Request Body**:
     ```json
     {
@@ -66,43 +75,91 @@ BookingAPI es una API RESTful desarrollada con Spring Boot que permite gestionar
       "password": "password123"
     }
     ```
+   - **Response**:
+    
+Devuelve un JWT (Token de autenticación) que se puede usar para acceder a rutas protegidas.
+```
+    {
+      "token": "your-jwt-token"
+    }
+```
 
 ### 2. Gestión de Usuarios
 
-- **GET** `/api/users/{username}`: Obtiene la información de un usuario por su nombre de usuario.
-- **PUT** `/api/users/{username}`: Actualiza la información de un usuario.
-- **DELETE** `/api/users/{username}`: Elimina un usuario.
+- **POST** `/api/users?roleName=ROLE_NAME`: Crea un nuevo usuario con el rol especificado. Solo accesible por administradores.
+- **GET** `/api/users`: Obtiene la lista de todos los usuarios. Solo accesible por administradores.
+- **GET** `/api/users/{id}`: Obtiene la información de un usuario por su ID. Solo accesible por administradores.
+- **PUT** `/api/users/{id}`: Actualiza la información de un usuario por su ID. Solo accesible por administradores.
+- **DELETE** `/api/users/{id}`: Elimina un usuario por su ID. Solo accesible por administradores.
+
 
 ### 3. Gestión de Reservas
 
 - **POST** `/api/bookings`: Crea una nueva reserva.
-  - **Request Body**:
+  - **Request Body** (ejemplo):
     ```json
     {
-      "roomId": 1,
-      "username": "john.doe",
-      "startDate": "2025-05-01",
-      "endDate": "2025-05-05"
+      "customerName": "John Doe",
+      "service": "Spa",
+      "bookingDate": "2025-05-01",
+      "user": {
+        "id": 1
+      },
+      "room": {
+        "id": 1
+      }
     }
     ```
 
 - **GET** `/api/bookings`: Obtiene todas las reservas.
+
 - **GET** `/api/bookings/{id}`: Obtiene una reserva por su ID.
+
+- **PUT** `/api/bookings/{id}`: Actualiza una reserva existente por su ID.
+
+- **DELETE** `/api/bookings/{id}`: Elimina una reserva por su ID.
+
 
 ### 4. Gestión de Habitaciones
 
 - **POST** `/api/rooms`: Crea una nueva habitación.
-  - **Request Body**:
+  - **Request Body** (ejemplo):
     ```json
     {
       "name": "Room 101",
-      "price": 100.0,
       "capacity": 2
     }
     ```
 
 - **GET** `/api/rooms`: Obtiene todas las habitaciones.
+
 - **GET** `/api/rooms/{id}`: Obtiene una habitación por su ID.
+
+- **PUT** `/api/rooms/{id}`: Actualiza una habitación existente.
+  - **Request Body** (ejemplo):
+    ```json
+    {
+      "name": "Room 101 Renovated",
+      "capacity": 3
+    }
+    ```
+
+- **DELETE** `/api/rooms/{id}`: Elimina una habitación por su ID.
+
+### 5. Gestión de Roles
+
+> ⚠️ **Requiere rol ADMIN**
+
+- **POST** `/api/roles`: Crea un nuevo rol.
+  - **Request Body** (ejemplo):
+    ```json
+    {
+      "name": "DEVELOPER"
+    }
+    ```
+
+- **GET** `/api/roles/{roleName}`: Obtiene un rol por su nombre.
+
 
 ## Instalación
 
@@ -122,6 +179,9 @@ O si usas Gradle:
 
 	gradle bootRun
 
+Una vez realizado podrás entrar en:
+
+**http://localhost:8080/**
 
 ## Swagger
 
@@ -129,12 +189,45 @@ La documentación de la API está disponible a través de Swagger. Una vez que l
 
 **http://localhost:8080/swagger-ui.html**
 
-## Seguridad
-La API utiliza JWT para la autenticación. Al iniciar sesión con el endpoint /api/auth/login, se obtiene un token que debe incluirse en las cabeceras de las solicitudes subsecuentes.
+o desde la pagina inicial:
 
-_Ejemplo de cómo incluir el token en las cabeceras:_
+**http://localhost:8080/**
+
+
+## Seguridad (JWT)
+
+Esta API utiliza autenticación basada en **JWT (JSON Web Tokens)** para proteger los endpoints. A continuación se describe cómo funciona y cómo está implementado:
+
+### 🔐 Flujo de Autenticación
+
+1. **Generación del Token**  
+   El backend genera un token JWT usando `JwtTokenUtils` al autenticar al usuario.  
+   Este token incluye:
+   - El nombre de usuario (`subject`)
+   - Una lista de roles (`claim` llamado `roles`)
+   - Fecha de creación y expiración (1 hora por defecto)
+
+2. **Envío del Token**  
+   El cliente debe enviar el token en la cabecera `Authorization` en cada petición protegida, con el formato:
 
 **Authorization: Bearer <jwt_token>**
+
+
+3. **Validación del Token**  
+El filtro `JwtAuthenticationFilter` intercepta las peticiones:
+- Extrae y valida el token
+- Extrae los roles del token
+- Crea un `UsernamePasswordAuthenticationToken` y lo asigna al `SecurityContext`
+
+4. **Roles y Autorización**  
+Los roles extraídos del token se convierten a `SimpleGrantedAuthority` con el prefijo `ROLE_`, necesarios para proteger rutas mediante anotaciones como:
+
+```java
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> metodoProtegido() {
+    // ...
+}
+```
 
 ## Pruebas
 

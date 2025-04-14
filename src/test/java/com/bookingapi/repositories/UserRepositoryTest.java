@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Optional;
+
 @SpringBootTest
 public class UserRepositoryTest {
 
@@ -21,33 +23,27 @@ public class UserRepositoryTest {
 
     @Test
     public void testSaveUser() {
-        // Creamos un nuevo usuario
         User user = new User();
         user.setName("john_doe");
         user.setEmail("john.doe@example.com");
 
-        // Guardamos el usuario
         User savedUser = userRepository.save(user);
 
-        // Verificamos que el usuario se guardó correctamente
         assertNotNull(savedUser);
-        assertNotNull(savedUser.getId()); // El ID debe haberse generado
+        assertNotNull(savedUser.getId());
         assertEquals("john_doe", savedUser.getName());
         assertEquals("john.doe@example.com", savedUser.getEmail());
     }
 
     @Test
     public void testFindById() {
-        // Creamos un nuevo usuario y lo guardamos
         User user = new User();
         user.setName("jane_doe");
         user.setEmail("jane.doe@example.com");
         User savedUser = userRepository.save(user);
 
-        // Buscamos el usuario por su ID
         User foundUser = userRepository.findById(savedUser.getId()).orElse(null);
 
-        // Verificamos que el usuario fue encontrado correctamente
         assertNotNull(foundUser);
         assertEquals(savedUser.getId(), foundUser.getId());
         assertEquals("jane_doe", foundUser.getName());
@@ -56,10 +52,40 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindByIdNotFound() {
-        // Buscamos un usuario que no existe
         User foundUser = userRepository.findById(999L).orElse(null);
 
-        // Verificamos que no se encontró el usuario
         assertNull(foundUser);
     }
+
+    @Test
+    public void testFindByEmail() {
+        User user = new User();
+        user.setName("john_doe");
+        user.setEmail("john.doe@example.com");
+        userRepository.save(user);
+
+        Optional<User> foundUser = userRepository.findByEmail("john.doe@example.com");
+
+        assertTrue(foundUser.isPresent());
+        assertEquals("john.doe@example.com", foundUser.get().getEmail());
+    }
+
+    @Test
+    public void testFindByEmailNotFound() {
+        Optional<User> foundUser = userRepository.findByEmail("nonexistent@example.com");
+
+        assertFalse(foundUser.isPresent());
+    }
+
+    @Test
+    public void testExistsByEmail() {
+        User user = new User();
+        user.setName("john_doe");
+        user.setEmail("john.doe@example.com");
+        userRepository.save(user);
+
+        assertTrue(userRepository.existsByEmail("john.doe@example.com"));
+        assertFalse(userRepository.existsByEmail("nonexistent@example.com"));
+    }
 }
+
