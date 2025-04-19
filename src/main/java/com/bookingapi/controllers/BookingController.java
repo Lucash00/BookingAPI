@@ -20,8 +20,8 @@ public class BookingController {
     private BookingService bookingService;
 
     @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingService.getAllBookings();
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
     @GetMapping("/{id}")
@@ -30,30 +30,33 @@ public class BookingController {
             Booking booking = bookingService.getBookingById(id);
             return ResponseEntity.ok(booking);
         } catch (ResourceNotFoundException ex) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @PostMapping
     public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
-        validateBookingInput(booking);
-        Booking createdBooking = bookingService.createBooking(booking);
-        return new ResponseEntity<>(createdBooking, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        validateBookingInput(updatedBooking);
         try {
-            Booking booking = bookingService.updateBooking(id, updatedBooking);
-            return ResponseEntity.ok(booking);
-        } catch (ResourceNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Proporcionar un mensaje específico
+            validateBookingInput(booking);
+            Booking created = bookingService.createBooking(booking);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (ValidationException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);  // Validación específica
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
+        try {
+            validateBookingInput(booking);
+            Booking updated = bookingService.updateBooking(id, booking);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (ValidationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
@@ -61,29 +64,25 @@ public class BookingController {
             bookingService.deleteBooking(id);
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundException ex) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     private void validateBookingInput(Booking booking) {
-        if (booking.getCustomerName() == null || booking.getCustomerName().isBlank()) {
-            throw new ValidationException("El nombre del cliente es obligatorio.");
+        if (booking.getCustomerName() == null || booking.getCustomerName().trim().isEmpty()) {
+            throw new ValidationException("Customer name is required.");
         }
-
-        if (booking.getService() == null || booking.getService().isBlank()) {
-            throw new ValidationException("El servicio es obligatorio.");
+        if (booking.getService() == null || booking.getService().trim().isEmpty()) {
+            throw new ValidationException("Service is required.");
         }
-
         if (booking.getBookingDate() == null) {
-            throw new ValidationException("La fecha de la reserva es obligatoria.");
+            throw new ValidationException("Booking date is required.");
         }
-
         if (booking.getUser() == null) {
-            throw new ValidationException("El usuario asociado es obligatorio.");
+            throw new ValidationException("User is required.");
         }
-
         if (booking.getRoom() == null) {
-            throw new ValidationException("La habitación asociada es obligatoria.");
+            throw new ValidationException("Room is required.");
         }
     }
 }

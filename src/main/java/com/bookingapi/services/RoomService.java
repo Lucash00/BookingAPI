@@ -1,7 +1,6 @@
 package com.bookingapi.services;
 
 import com.bookingapi.exceptions.ResourceNotFoundException;
-import com.bookingapi.exceptions.ValidationException;
 import com.bookingapi.models.Room;
 import com.bookingapi.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,7 @@ public class RoomService {
     // Crear una nueva habitación
     public Room createRoom(Room room) {
         // Validación básica (puedes agregar más validaciones aquí)
-        if (room.getName() == null || room.getCapacity() <= 0) {  // Cambiado a `name` y `capacity`
-            throw new ValidationException("Room name and valid capacity must be provided");
-        }
+        room.validateRoomInput(room);  // Utilizando el método de validación que ya definiste
         return roomRepository.save(room);
     }
 
@@ -45,9 +42,7 @@ public class RoomService {
     // Actualizar una habitación existente
     public Room updateRoom(Long id, Room room) {
         // Validación básica para actualizar
-        if (room.getName() == null || room.getCapacity() <= 0) {
-            throw new ValidationException("Room name and valid capacity must be provided");
-        }
+        room.validateRoomInput(room);  // Utilizando el método de validación que ya definiste
 
         // Verificar si la habitación existe
         Room existingRoom = roomRepository.findById(id)
@@ -55,10 +50,16 @@ public class RoomService {
 
         // Actualizar los campos relevantes
         existingRoom.setName(room.getName());
+        existingRoom.setLocation(room.getLocation());
         existingRoom.setCapacity(room.getCapacity());
+        existingRoom.setAvailable(room.isAvailable());
+        existingRoom.setType(room.getType());
+        existingRoom.setPricePerNight(room.getPricePerNight());
+        existingRoom.setDescription(room.getDescription());
+        existingRoom.setImageUrl(room.getImageUrl());
+        existingRoom.setMaintenanceStatus(room.getMaintenanceStatus());
 
         // Guardar la habitación actualizada
         return roomRepository.save(existingRoom);
     }
-
 }

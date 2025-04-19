@@ -1,7 +1,7 @@
 package com.bookingapi.services;
 
+import com.bookingapi.exceptions.RoleNotFoundException;
 import com.bookingapi.exceptions.ResourceNotFoundException;
-import com.bookingapi.exceptions.ValidationException;
 import com.bookingapi.models.Role;
 import com.bookingapi.models.User;
 import com.bookingapi.repositories.RoleRepository;
@@ -9,6 +9,7 @@ import com.bookingapi.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,7 +19,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository;  // Repositorio para manejar roles
+    private RoleRepository roleRepository;
 
     // Obtener todos los usuarios
     public List<User> getAllUsers() {
@@ -27,17 +28,21 @@ public class UserService {
 
     // Crear un nuevo usuario con el rol asociado
     public User createUser(User user, String roleName) {
-        // Validación básica (puedes agregar más validaciones aquí)
-        if (user.getName() == null || user.getEmail() == null) {
-            throw new ValidationException("Name and email must be provided");
-        }
+        // Validar datos del usuario antes de crear
+        user.validateUserInput(user);
 
         // Buscar el rol por nombre
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ValidationException("Role not found: " + roleName));  // Aquí usamos orElseThrow
+                .orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
 
-        // Asignar el rol al usuario
-        user.getRoles().add(role); // Añadir el rol al usuario
+        // Verificar si el rol ya está asignado al usuario
+        if (user.getRoles() == null) {
+            user.setRoles(new ArrayList<>());
+        }
+        if (!user.getRoles().contains(role)) {
+            user.getRoles().add(role);
+        }
+
 
         return userRepository.save(user);
     }
@@ -60,6 +65,7 @@ public class UserService {
     public User updateUser(Long id, User updatedUser) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        updatedUser.validateUserInput(updatedUser);
 
         existingUser.setName(updatedUser.getName());
         existingUser.setEmail(updatedUser.getEmail());

@@ -18,7 +18,7 @@ public class SwaggerConfig {
                 .version("1.0.0")
                 .description("Documentación interactiva para la API de reservas")
                 .contact(new Contact()
-                    .name("Lucas Moreno")
+                    .name("Lucas Moreno Corral")
                     .email("lucas.moreno.dev@gmail.com")
                     .url("https://www.lucas-moreno-dev.com/"))
                 .license(new License()

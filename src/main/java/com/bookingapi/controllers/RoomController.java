@@ -35,22 +35,14 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@RequestBody Room room) {
-        // Validaciones
-        if (room.getName() == null || room.getName().isEmpty()) {
-            throw new ValidationException("El nombre de la habitación es obligatorio.");
-        }
-
-        if (room.getCapacity() <= 0) {  // Validación de capacidad positiva
-            throw new ValidationException("La capacidad de la habitación debe ser mayor a 0.");
-        }
-
         Room createdRoom = roomService.createRoom(room);
         return new ResponseEntity<>(createdRoom, HttpStatus.CREATED);
     }
 
+
+
     @PutMapping("/{id}")
     public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room updatedRoom) {
-        validateRoomInput(updatedRoom);
         try {
             Room room = roomService.updateRoom(id, updatedRoom);
             return ResponseEntity.ok(room);
@@ -60,7 +52,7 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-
+    
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
@@ -72,14 +64,5 @@ public class RoomController {
         }
     }
     
-    private void validateRoomInput(Room room) {
-        if (room.getName() == null || room.getName().isEmpty()) {
-            throw new ValidationException("El nombre de la habitación es obligatorio.");
-        }
-
-        if (room.getCapacity() <= 0) {  // Validación de capacidad positiva
-            throw new ValidationException("La capacidad de la habitación debe ser mayor a 0.");
-        }
-    }
 
 }

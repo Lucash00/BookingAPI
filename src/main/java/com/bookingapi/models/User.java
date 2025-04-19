@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "users")
@@ -22,11 +23,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false) // Esta propiedad es obligatoria
     private String name;
+
+    @Column(nullable = false, unique = true) // Email obligatorio y único
     private String email;
+
+    @Column(nullable = false) // Teléfono obligatorio
     private String phone;
 
-    // Nueva propiedad para la contraseña
+    @Column(nullable = false) // Contraseña obligatoria
     private String password;
 
     @CreatedDate
@@ -57,7 +63,9 @@ public class User {
     private List<Booking> bookings;
 
     // Constructores
-    public User() {}
+    public User() {
+        this.roles = new ArrayList<>();
+    }
 
     public User(String name, String email, String phone, String password, List<Booking> bookings, List<Role> roles) {
         this.name = name;
@@ -65,7 +73,6 @@ public class User {
         this.phone = phone;
         this.password = password;
         this.bookings = bookings;
-        this.roles = roles;
     }
 
     // Getters y setters
@@ -137,6 +144,7 @@ public class User {
         return updatedBy;
     }
 
+    // Validaciones
     public void validateUserInput(User user) {
         if (user.getName() == null || user.getName().trim().isEmpty()) {
             throw new ValidationException("User name is required.");
@@ -146,6 +154,9 @@ public class User {
         }
         if (user.getPhone() == null || !user.getPhone().matches("^\\+?[0-9]*$")) {
             throw new ValidationException("Valid phone number is required.");
+        }
+        if (user.getPassword() == null || user.getPassword().length() < 8) { // Contraseña debe tener al menos 8 caracteres
+            throw new ValidationException("Password must be at least 8 characters long.");
         }
     }
 }
